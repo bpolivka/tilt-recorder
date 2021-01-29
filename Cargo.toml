@@ -1,0 +1,13 @@
+[package]
+name = "tilt-recorder"
+version = "0.1.0"
+authors = ["brett"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+btleplug = "*"
+influxdb = { version = "0.3.0", features = ["derive"] }
+chrono = "*"
+async-std = { version = "1.7.0", features = ["attributes"] }
