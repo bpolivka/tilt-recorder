@@ -3,7 +3,6 @@ use btleplug::{
     bluez::manager::Manager,
 };
 use chrono::{DateTime, Utc};
-use env::var;
 use influxdb::{Client, InfluxDbWriteable};
 use std::env;
 
@@ -59,12 +58,18 @@ struct TiltReading {
 
 #[async_std::main]
 async fn main() {
+    let adapter_name = env::var("BT_ADAPTER").unwrap();
+
     let manager = Manager::new().unwrap();
 
     let client = Client::new(env::var("INFLUXDB_URL").unwrap(), "brewery");
 
     let adapters = manager.adapters().unwrap();
-    let adapter = adapters.into_iter().nth(0).unwrap();
+    let adapter = adapters
+        .into_iter()
+        .filter(|x| x.name == adapter_name)
+        .nth(0)
+        .unwrap();
 
     let central = adapter.connect().unwrap();
 
