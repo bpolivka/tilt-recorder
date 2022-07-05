@@ -7,7 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-btleplug = "*"
-influxdb = { version = "0.3.0", features = ["derive"] }
-chrono = "*"
-async-std = { version = "1.7.0", features = ["attributes"] }
+btleplug = "0.9"
+influxdb = { version = "0.5", features = ["derive"] }
+tokio = { version = "1.17", features = ["macros", "rt", "rt-multi-thread"] }
+chrono = "0.4"
+futures = "0.3"
