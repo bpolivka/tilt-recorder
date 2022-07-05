@@ -2,6 +2,9 @@
 FROM rust:1.62.0 AS builder
 WORKDIR /usr/src/
 
+RUN apt-get update && \
+  apt-get install -y libdbus-1-dev pkg-config
+
 RUN USER=root cargo new tilt-recorder
 WORKDIR /usr/src/tilt-recorder
 COPY Cargo.toml Cargo.lock ./
