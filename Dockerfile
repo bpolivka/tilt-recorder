@@ -15,7 +15,7 @@ RUN cargo install --path .
 
 FROM debian:buster-slim
 RUN apt-get update && \
-  apt-get install -y libssl1.1
+  apt-get install -y libssl1.1 dbus
 
 COPY --from=builder /usr/local/cargo/bin/tilt-recorder /usr/local/bin/tilt-recorder
 CMD ["tilt-recorder"]
