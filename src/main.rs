@@ -69,6 +69,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let events = adapter.events().await?;
         adapter.start_scan(ScanFilter::default()).await?;
         streams.push(events);
+        println!("Scanning {:?}", adapter);
     }
 
     let mut events = select_all(streams);
@@ -79,6 +80,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 manufacturer_data, ..
             } => {
                 if let Some(data) = manufacturer_data.get(&TILT_MFG_ID) {
+                    if !is_tilt_update(data) {
+                        continue;
+                    }
+
                     let len = data.len();
                     let color = code_to_color(data[5]).unwrap();
                     let temp = ((data[len - 5] as u16) << 8) | (data[len - 4] as u16);
@@ -102,52 +107,27 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+}
 
-    // let adapter_name = env::var("BT_ADAPTER").unwrap();
+fn is_tilt_update(data: &Vec<u8>) -> bool {
+    if data.len() < 20 {
+        return false;
+    }
 
-    // let client = Client::new(env::var("INFLUXDB_URL").unwrap(), "brewery");
+    if &data[0..2] != &[0x2, 0x15] {
+        return false;
+    }
 
-    // let adapter = adapters
-    //     .into_iter()
-    //     .filter(|x| x.name == adapter_name)
-    //     .nth(0)
-    //     .unwrap();
+    // UUID: A4 95 BB <color> C5 B1 4B 44 B5 12 13 70 F0 2D 74 DE
 
-    // let central = adapter.connect().unwrap();
+    if &data[2..5] != &[0xa4, 0x95, 0xbb]
+        || &data[6..18]
+            != &[
+                0xc5, 0xb1, 0x4b, 0x44, 0xb5, 0x12, 0x13, 0x70, 0xf0, 0x2d, 0x74, 0xde,
+            ]
+    {
+        return false;
+    }
 
-    // let event_receiver = central.event_receiver().unwrap();
-
-    // central.start_scan().unwrap();
-
-    // while let Ok(event) = event_receiver.recv() {
-    //     match event {
-    //         CentralEvent::DeviceUpdated(bd_addr) => {
-    //             let peripheral = central.peripheral(bd_addr).unwrap();
-    //             match peripheral.properties().manufacturer_data {
-    //                 Some(data) => {
-    //                     let len = data.len();
-    //                     if len >= 6 && &data[0..6] == TILT_MFG_ID {
-    //                         let color = code_to_color(data[7]).unwrap();
-    //                         let temp = ((data[len - 5] as u16) << 8) | (data[len - 4] as u16);
-    //                         let sg_int = ((data[len - 3] as u16) << 8) | (data[len - 2] as u16);
-    //                         let sg = (sg_int as f32) / 1000.0;
-
-    //                         let reading = TiltReading {
-    //                             time: Utc::now(),
-    //                             color: color_name(color),
-    //                             temp: temp,
-    //                             sg: sg,
-    //                         };
-
-    //                         println!("tilt: {:?}", reading);
-
-    //                         let _ = client.query(&reading.into_query("tilt")).await;
-    //                     }
-    //                 }
-    //                 None => {}
-    //             }
-    //         }
-    //         _ => {}
-    //     }
-    // }
+    true
 }
