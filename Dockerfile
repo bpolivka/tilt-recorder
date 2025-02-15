@@ -1,5 +1,5 @@
 # Build Stage
-FROM rust:1.62.0 AS builder
+FROM rust:1.84.1 AS builder
 WORKDIR /usr/src/
 
 RUN apt-get update && \
