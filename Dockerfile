@@ -13,9 +13,9 @@ RUN cargo build --release
 COPY src ./src
 RUN cargo install --path .
 
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 RUN apt-get update && \
-  apt-get install -y libssl1.1 dbus
+  apt-get install -y libssl3 dbus
 
 COPY --from=builder /usr/local/cargo/bin/tilt-recorder /usr/local/bin/tilt-recorder
 CMD ["tilt-recorder"]
